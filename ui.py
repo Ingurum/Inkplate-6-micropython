@@ -6,6 +6,7 @@ python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py :
 python pyboard.py --device /dev/ttyUSB0 ui.py
 '''
 
+
 class UI:
     '''
     This helps with layout of the InkPlate UI. 
@@ -18,6 +19,9 @@ class UI:
         self.display.begin()
         width = self.display.width()
         height = self.display.height()
+        self._columnar_interface(width, height)
+
+    def _build_textual_interface(self, width, height):
         self.root = Column(
             layout_width=width,
             layout_height=height,
@@ -28,7 +32,7 @@ class UI:
         column.add_spacer(20)
         self.root.add_node(column)
         # Nested Row
-        row =  Row(parent=self.root, padding=10)
+        row = Row(parent=self.root, padding=10)
         row.add_text_content('Test 1')
         row.add_text_content('Test 2')
         row.add_text_content('Test 3')
@@ -61,6 +65,27 @@ class UI:
             text_size=10,
             align=TEXT_ALIGN_CENTER
         )
+
+    def _columnar_interface(self, width, height):
+        self.root = Row(
+            layout_width=width,
+            layout_height=height,
+            padding=10
+        )
+
+        count = 3
+        columns = [
+            Column(
+                self.root,
+                layout_width=width // count,
+                padding=10) for _ in range(count)
+        ]
+        for column in columns:
+            column.add_text_content('Line 1', align=TEXT_ALIGN_CENTER)
+            column.add_text_content('Line 2', align=TEXT_ALIGN_CENTER)
+            column.add_text_content('Line 3', align=TEXT_ALIGN_CENTER)
+            column.add_text_content('Line 4', align=TEXT_ALIGN_CENTER)
+            self.root.add_node(column)
 
     def draw(self):
         self.display.clean()
