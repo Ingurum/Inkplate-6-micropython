@@ -1,8 +1,9 @@
 from inkplate import Inkplate
-from layout import TEXT_ALIGN_CENTER, TEXT_ALIGN_RIGHT, FlowLayout
+from layout import TEXT_ALIGN_CENTER, TEXT_ALIGN_RIGHT, Column, Row
 
 '''
-python3 pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py :
+python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py :
+python pyboard.py --device /dev/ttyUSB0 ui.py
 '''
 
 class UI:
@@ -17,14 +18,23 @@ class UI:
         self.display.begin()
         width = self.display.width()
         height = self.display.height()
-        self.root = FlowLayout(
-            max_width=width,
-            max_height=height,
+        self.root = Column(
+            m_width=width,
+            m_height=height,
             padding=20
         )
-        nested = FlowLayout(padding=40)
-        nested.add_spacer(height // 4)
-        self.root.add_node(nested)
+        # Nested Column
+        column = Column(parent=self.root, padding=0)
+        column.add_spacer(20)
+        self.root.add_node(column)
+        # Nested Row
+        row =  Row(parent=self.root, padding=10)
+        row.add_text_content('Test 1')
+        row.add_text_content('Test 2')
+        row.add_text_content('Test 3')
+        row.add_text_content('Test 4')
+        self.root.add_node(row)
+        # Other text nodes
         self.root.add_text_content(
             'Good Morning, Rahul',
             text_size=3
