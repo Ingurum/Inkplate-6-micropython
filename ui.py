@@ -46,6 +46,11 @@ class UI:
             text_size=9,
             align=TEXT_ALIGN_CENTER
         )
+        self.root.add_text_content(
+            'Largest Text',
+            text_size=10,
+            align=TEXT_ALIGN_CENTER
+        )
 
     def draw(self):
         self.display.clean()
