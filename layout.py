@@ -12,21 +12,15 @@ class Node:
     A layout node.
     '''
 
-    def __init__(self, parent=None, padding=0):
+    def __init__(self, parent=None, layout_width=0, layout_height=0, padding=0):
         self.parent = parent
         self.padding = padding
-
-    def max_width(self):
         if self.parent:
-            return self.parent.max_width()
+            self.layout_width = self.parent.layout_width
+            self.layout_height = self.parent.layout_height
         else:
-            return getattr(self, 'm_width', 0) - 2 * self.padding
-
-    def max_height(self):
-        if self.parent:
-            return self.parent.max_height()
-        else:
-            return getattr(self, 'm_height', 0) - 2 * self.padding
+            self.layout_width = layout_width - 2 * self.padding
+            self.layout_height = layout_height - 2 * self.padding
 
     def measure(self):
         '''
@@ -43,14 +37,13 @@ class Column(Node):
     A simple FlowLayout. 
     '''
 
-    def __init__(self, parent=None, m_width=0, m_height=0, padding=0):
-        super().__init__(parent=parent, padding=padding)
-        if parent:
-            self.m_width = self.max_width()
-            self.m_height = self.max_height()
-        else:
-            self.m_width = m_width
-            self.m_height = m_height
+    def __init__(self, parent=None, layout_width=0, layout_height=0, padding=0):
+        super().__init__(
+            parent=parent,
+            layout_width=layout_width,
+            layout_height=layout_height,
+            padding=padding
+        )
         self.children = list()
 
     def add_node(self, node):
@@ -71,7 +64,7 @@ class Column(Node):
         self.add_node(node)
 
     def measure(self):
-        width = self.m_width
+        width = self.layout_width
         height = 0
         for child in self.children:
             if child is Node:
@@ -106,7 +99,6 @@ class TextNode(Node):
 
         super().__init__(parent=parent, padding=padding)
         self.content = content
-        self.m_width = self.max_width()
         self.text_size = text_size
         self.text = Text(
             self.content,
@@ -122,15 +114,15 @@ class TextNode(Node):
         d_x = x
         d_y = y + self.padding
         if self.align == TEXT_ALIGN_CENTER or self.align == TEXT_ALIGN_RIGHT:
-            if self.m_width == 0:
+            if self.layout_width == 0:
                 print('Invalid constraints [TextNode %s]' % (self.content))
             else:
                 width = self.text.measured_width()
                 half_width = int(width / 2)
                 if self.align == TEXT_ALIGN_CENTER:
-                    d_x = int(self.m_width / 2) - half_width
+                    d_x = int(self.layout_width / 2) - half_width
                 else:
-                    d_x = self.m_width - width
+                    d_x = self.layout_width - width
         else:
             d_x = x + self.padding
         display.setTextSize(self.text_size)
@@ -146,18 +138,17 @@ class Row(Node):
     A Row. (Flow layout in horizontal direction)
     '''
 
-    def __init__(self, parent=None, m_width=0, m_height=0, padding=0):
-        super().__init__(parent=parent, padding=padding)
-        if parent:
-            self.m_width = self.max_width()
-            self.m_height = self.max_height()
-        else:
-            self.m_width = m_width
-            self.m_height = m_height
+    def __init__(self, parent=None, layout_width=0, layout_height=0, padding=0):
+        super().__init__(
+            parent=parent,
+            layout_width=layout_width,
+            layout_height=layout_height,
+            padding=padding
+        )
         self.children = list()
 
     def measure(self):
-        width = self.m_width
+        width = self.layout_width
         height = 0
         for child in self.children:
             if child is Node:
@@ -200,7 +191,7 @@ class Spacer(Node):
 
     def __init__(self, parent, height, padding=0):
         super().__init__(parent=parent, padding=padding)
-        self.width = self.max_width()
+        self.width = self.layout_width
         self.height = height
 
     def measure(self):

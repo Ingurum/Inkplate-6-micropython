@@ -19,8 +19,8 @@ class UI:
         width = self.display.width()
         height = self.display.height()
         self.root = Column(
-            m_width=width,
-            m_height=height,
+            layout_width=width,
+            layout_height=height,
             padding=20
         )
         # Nested Column
