@@ -1,8 +1,9 @@
 from inkplate import Inkplate
 from layout import ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Column, Row
+from images import CALENDAR_32_32
 
 '''
-python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py :
+python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py images.py :
 python pyboard.py --device /dev/ttyUSB0 ui.py
 '''
 
@@ -90,6 +91,7 @@ class UI:
             column.add_text_content('Line 4', align=ALIGN_CENTER)
             column.add_text_content('Line 5', align=ALIGN_RIGHT)
             column.add_text_content('Line 6', align=ALIGN_LEFT)
+            column.add_image(CALENDAR_32_32, 32,  32, align=ALIGN_CENTER)
             self.root.add_node(column)
 
     def draw(self):

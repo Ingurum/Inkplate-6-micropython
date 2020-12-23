@@ -1,3 +1,4 @@
+from inkplate import Inkplate
 from text import Text
 
 # Text alignments
@@ -90,6 +91,24 @@ class Column(Node):
             parent=self,
             content=content,
             text_size=text_size,
+            align=align
+        )
+        self.add_node(node)
+
+    def add_image(
+        self,
+        image,
+        width,
+        height,
+        wrap_content=True,
+        align=ALIGN_LEFT
+    ):
+        node = ImageNode(
+            parent=self,
+            image=image,
+            width=width,
+            height=height,
+            wrap_content=wrap_content,
             align=align
         )
         self.add_node(node)
@@ -244,6 +263,24 @@ class Row(Node):
         )
         self.add_node(node)
 
+    def add_image(
+        self,
+        image,
+        width,
+        height,
+        wrap_content=True,
+        align=ALIGN_LEFT
+    ):
+        node = ImageNode(
+            parent=self,
+            image=image,
+            width=width,
+            height=height,
+            wrap_content=wrap_content,
+            align=align
+        )
+        self.add_node(node)
+
     def draw(self, display, x, y):
         # Measure once
         measurements = list()
@@ -301,4 +338,60 @@ class Spacer(Node):
             self.width,
             self.height,
             display.BLACK
+        )
+
+
+class ImageNode(Node):
+    '''
+    An Image Node
+    '''
+
+    def __init__(
+            self,
+            parent,
+            image,
+            width,
+            height,
+            padding=0,
+            wrap_content=True,
+            align=ALIGN_LEFT):
+
+        super().__init__(
+            parent=parent,
+            padding=padding,
+            wrap_content=wrap_content,
+            align=align
+        )
+        self.image = image
+        self.width = width
+        self.height = height
+        self.reversed = reversed
+
+    def measure(self):
+        if self.wrap_content:
+            return self.layout_width, self.layout_height
+        else:
+            w = self.width + self.padding
+            h = self.height + self.padding
+            return w, h
+
+    def draw(self, display, x, y):
+        d_x = x
+        d_y = y + self.padding
+        if self.align == ALIGN_CENTER or self.align == ALIGN_RIGHT:
+            w = self.width
+            h_w = int(w / 2)
+            center_w = int(self.layout_width / 2)
+            if self.align == ALIGN_CENTER:
+                d_x += (center_w - h_w)
+            else:
+                d_x += (self.layout_width - w)
+        else:
+            d_x += self.padding
+        display.drawBitmap(
+            d_x,
+            d_y,
+            self.image,
+            self.width,
+            self.height
         )
