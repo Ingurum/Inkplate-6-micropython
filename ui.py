@@ -1,5 +1,5 @@
 from inkplate import Inkplate
-from layout import TEXT_ALIGN_CENTER, TEXT_ALIGN_RIGHT, Column, Row
+from layout import TEXT_ALIGN_CENTER, TEXT_ALIGN_LEFT, TEXT_ALIGN_RIGHT, Column, Row
 
 '''
 python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py :
@@ -70,7 +70,7 @@ class UI:
         self.root = Row(
             layout_width=width,
             layout_height=height,
-            padding=10
+            padding=15
         )
 
         count = 3
@@ -85,6 +85,8 @@ class UI:
             column.add_text_content('Line 2', align=TEXT_ALIGN_CENTER)
             column.add_text_content('Line 3', align=TEXT_ALIGN_CENTER)
             column.add_text_content('Line 4', align=TEXT_ALIGN_CENTER)
+            column.add_text_content('Line 5', align=TEXT_ALIGN_RIGHT)
+            column.add_text_content('Line 6', align=TEXT_ALIGN_LEFT)
             self.root.add_node(column)
 
     def draw(self):

@@ -93,7 +93,6 @@ class Column(Node):
 
         for child in self.children:
             w, h = child.measure()
-            # Debug
             child.draw(display, d_x, d_y)
             d_y += h + self.padding
 
