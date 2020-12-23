@@ -1,5 +1,5 @@
 from inkplate import Inkplate
-from layout import TEXT_ALIGN_CENTER, TEXT_ALIGN_LEFT, TEXT_ALIGN_RIGHT, Column, Row
+from layout import ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Column, Row
 
 '''
 python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py :
@@ -19,6 +19,7 @@ class UI:
         self.display.begin()
         width = self.display.width()
         height = self.display.height()
+        # self._build_textual_interface(width, height)
         self._columnar_interface(width, height)
 
     def _build_textual_interface(self, width, height):
@@ -32,7 +33,7 @@ class UI:
         column.add_spacer(20)
         self.root.add_node(column)
         # Nested Row
-        row = Row(parent=self.root, padding=10)
+        row = Row(parent=self.root, padding=10, align=ALIGN_CENTER)
         row.add_text_content('Test 1')
         row.add_text_content('Test 2')
         row.add_text_content('Test 3')
@@ -48,29 +49,30 @@ class UI:
         self.root.add_text_content(
             'Medium Text',
             text_size=5,
-            align=TEXT_ALIGN_CENTER
+            align=ALIGN_CENTER
         )
         self.root.add_text_content(
             'More Medium Text',
             text_size=5,
-            align=TEXT_ALIGN_RIGHT
+            align=ALIGN_RIGHT
         )
         self.root.add_text_content(
             'Large Text',
             text_size=9,
-            align=TEXT_ALIGN_CENTER
+            align=ALIGN_CENTER
         )
         self.root.add_text_content(
             'Largest Text',
             text_size=10,
-            align=TEXT_ALIGN_CENTER
+            align=ALIGN_CENTER
         )
 
     def _columnar_interface(self, width, height):
         self.root = Row(
             layout_width=width,
             layout_height=height,
-            padding=15
+            padding=5,
+            align=ALIGN_CENTER
         )
 
         count = 3
@@ -78,15 +80,16 @@ class UI:
             Column(
                 self.root,
                 layout_width=width // count,
+                wrap_content=False, # Fill parent
                 padding=10) for _ in range(count)
         ]
         for column in columns:
-            column.add_text_content('Line 1', align=TEXT_ALIGN_CENTER)
-            column.add_text_content('Line 2', align=TEXT_ALIGN_CENTER)
-            column.add_text_content('Line 3', align=TEXT_ALIGN_CENTER)
-            column.add_text_content('Line 4', align=TEXT_ALIGN_CENTER)
-            column.add_text_content('Line 5', align=TEXT_ALIGN_RIGHT)
-            column.add_text_content('Line 6', align=TEXT_ALIGN_LEFT)
+            column.add_text_content('Line 1', align=ALIGN_CENTER)
+            column.add_text_content('Line 2', align=ALIGN_CENTER)
+            column.add_text_content('Line 3', align=ALIGN_CENTER)
+            column.add_text_content('Line 4', align=ALIGN_CENTER)
+            column.add_text_content('Line 5', align=ALIGN_RIGHT)
+            column.add_text_content('Line 6', align=ALIGN_LEFT)
             self.root.add_node(column)
 
     def draw(self):

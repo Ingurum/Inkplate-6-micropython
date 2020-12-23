@@ -2,9 +2,9 @@ from text import Text
 
 # Text alignments
 
-TEXT_ALIGN_LEFT = 0
-TEXT_ALIGN_CENTER = 1
-TEXT_ALIGN_RIGHT = 2
+ALIGN_LEFT = 0
+ALIGN_CENTER = 1
+ALIGN_RIGHT = 2
 
 
 class Node:
@@ -12,9 +12,20 @@ class Node:
     A layout node.
     '''
 
-    def __init__(self, parent=None, layout_width=0, layout_height=0, padding=0):
+    def __init__(
+            self,
+            parent=None,
+            layout_width=0,
+            layout_height=0,
+            wrap_content=False,
+            align=ALIGN_LEFT,
+            padding=0):
+
         self.parent = parent
         self.padding = padding
+        self.wrap_content = wrap_content
+        self.align = align
+
         if not self.parent and (layout_width == 0 or layout_height == 0):
             raise RuntimeError(
                 'Invalid constraints. Must specify parent or a size.')
@@ -47,11 +58,21 @@ class Column(Node):
     A simple FlowLayout. 
     '''
 
-    def __init__(self, parent=None, layout_width=0, layout_height=0, padding=0):
+    def __init__(
+        self,
+        parent=None,
+        layout_width=0,
+        layout_height=0,
+        wrap_content=True,
+        align=ALIGN_LEFT,
+        padding=0
+    ):
         super().__init__(
             parent=parent,
             layout_width=layout_width,
             layout_height=layout_height,
+            wrap_content=wrap_content,
+            align=align,
             padding=padding
         )
         self.children = list()
@@ -64,7 +85,7 @@ class Column(Node):
         node = Spacer(self, height)
         self.add_node(node)
 
-    def add_text_content(self, content, text_size=3, align=TEXT_ALIGN_LEFT):
+    def add_text_content(self, content, text_size=3, align=ALIGN_LEFT):
         node = TextNode(
             parent=self,
             content=content,
@@ -74,27 +95,53 @@ class Column(Node):
         self.add_node(node)
 
     def measure(self):
-        width = self.layout_width
+        width = 0
         height = 0
         for child in self.children:
-            if child is Node:
-                _, h = child.measure()
-                height += h
+            w, h = child.measure()
+            w_p = w + self.padding
+            width = w_p if width < w_p else width
+            height += h + self.padding
 
-        if height == 0:
+        if not self.wrap_content:
+            width = self.layout_width
+
+        if not self.wrap_content:
             height = self.layout_height
-        else:
-            height += self.padding
+
         return width, height
 
     def draw(self, display, x, y):
-        d_x = x + self.padding
+        # Measure once
+        measurements = list()
+        for child in self.children:
+            measurements.append(child.measure())
+        # Adjust x, y coordinates for alignment
+        d_x = x
+        if self.align == ALIGN_CENTER or self.align == ALIGN_RIGHT:
+            # Measure the children in the container
+            # to compute the actual intrinsic widths.
+            intrinsic_width = 0
+            for m in measurements:
+                w, _ = m
+                intrinsic_width += w
+
+            center_x = int(self.layout_width / 2)
+            h_w = int(intrinsic_width / 2)
+            if self.align == ALIGN_CENTER:
+                d_x += (center_x - h_w)
+            else:
+                d_x += (self.layout_width - intrinsic_width)
+        else:
+            d_x += self.padding
         d_y = y + self.padding
 
+        idx = 0
         for child in self.children:
-            w, h = child.measure()
+            w, h = measurements[idx]
             child.draw(display, d_x, d_y)
             d_y += h + self.padding
+            idx += 1
 
 
 class TextNode(Node):
@@ -108,9 +155,9 @@ class TextNode(Node):
             content,
             text_size=3,
             padding=5,
-            align=TEXT_ALIGN_LEFT):
+            align=ALIGN_LEFT):
 
-        super().__init__(parent=parent, padding=padding)
+        super().__init__(parent=parent, padding=padding, align=align)
         self.content = content
         self.text_size = text_size
         self.text = Text(
@@ -118,7 +165,6 @@ class TextNode(Node):
             text_size=self.text_size,
             padding=self.padding
         )
-        self.align = align
 
     def measure(self):
         return self.text.measured_width(), self.text.measured_height()
@@ -126,16 +172,14 @@ class TextNode(Node):
     def draw(self, display, x, y):
         d_x = x
         d_y = y + self.padding
-        if self.align == TEXT_ALIGN_CENTER or self.align == TEXT_ALIGN_RIGHT:
-            if self.layout_width == 0:
-                print('Invalid constraints [TextNode %s]' % (self.content))
+        if self.align == ALIGN_CENTER or self.align == ALIGN_RIGHT:
+            width = self.text.measured_width()
+            h_w = int(width / 2)
+            center_w = int(self.layout_width / 2)
+            if self.align == ALIGN_CENTER:
+                d_x = x + (center_w - h_w)
             else:
-                width = self.text.measured_width()
-                half_width = int(width / 2)
-                if self.align == TEXT_ALIGN_CENTER:
-                    d_x = x + (int(self.layout_width / 2) - half_width)
-                else:
-                    d_x = x + (self.layout_width - width)
+                d_x = x + (self.layout_width - width)
         else:
             d_x = x + self.padding
         display.setTextSize(self.text_size)
@@ -151,27 +195,39 @@ class Row(Node):
     A Row. (Flow layout in horizontal direction)
     '''
 
-    def __init__(self, parent=None, layout_width=0, layout_height=0, padding=0):
+    def __init__(
+            self,
+            parent=None,
+            layout_width=0,
+            layout_height=0,
+            wrap_content=True,
+            align=ALIGN_LEFT,
+            padding=0):
+
         super().__init__(
             parent=parent,
             layout_width=layout_width,
             layout_height=layout_height,
+            wrap_content=wrap_content,
+            align=align,
             padding=padding
         )
         self.children = list()
 
     def measure(self):
-        width = self.layout_width
+        width = 0
         height = 0
         for child in self.children:
-            if child is Node:
-                _, h = child.measure()
-                height = h if height < h else height
+            w, h = child.measure()
+            h_p = h + self.padding
+            width += w + self.padding
+            height = h_p if height < h_p else height
 
-        if height == 0:
+        if not self.wrap_content:
+            width = self.layout_width
+
+        if not self.wrap_content:
             height = self.layout_height
-        else:
-            height += self.padding
 
         return width, height
 
@@ -183,7 +239,7 @@ class Row(Node):
         node = Spacer(self, height, padding=self.padding)
         self.add_node(node)
 
-    def add_text_content(self, content, text_size=3, align=TEXT_ALIGN_LEFT):
+    def add_text_content(self, content, text_size=3, align=ALIGN_LEFT):
         node = TextNode(
             parent=self,
             content=content,
@@ -193,14 +249,38 @@ class Row(Node):
         self.add_node(node)
 
     def draw(self, display, x, y):
-        d_x = x + self.padding
-        d_y = y + self.padding
+        # Measure once
+        measurements = list()
         for child in self.children:
-            w, h = child.measure()
+            measurements.append(child.measure())
+
+        # Adjust x, y coordinates for alignment
+        d_x = x
+        if self.align == ALIGN_CENTER or self.align == ALIGN_RIGHT:
+            # Measure the children in the container
+            # to compute the actual intrinsic widths.
+            intrinsic_width = 0
+            for m in measurements:
+                w, _ = m
+                intrinsic_width += w
+
+            center_x = int(self.layout_width / 2)
+            h_w = int(intrinsic_width / 2)
+            if self.align == ALIGN_CENTER:
+                d_x += (center_x - h_w)
+            else:
+                d_x += (self.layout_width - intrinsic_width)
+        else:
+            d_x += self.padding
+        d_y = y + self.padding
+        idx = 0
+        for child in self.children:
+            w, h = measurements[idx]
             # Debug
             display.drawRect(d_x, d_y, w, h, display.BLACK)
             child.draw(display, d_x, d_y)
             d_x += w + self.padding
+            idx += 1
 
 
 class Spacer(Node):
@@ -209,6 +289,7 @@ class Spacer(Node):
     '''
 
     def __init__(self, parent, height, padding=0):
+        # Note: This should not wrap content.
         super().__init__(parent=parent, padding=padding)
         self.width = self.layout_width
         self.height = height
