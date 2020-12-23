@@ -97,17 +97,15 @@ class Column(Node):
     def measure(self):
         width = 0
         height = 0
-        for child in self.children:
-            w, h = child.measure()
-            w_p = w + self.padding
-            width = w_p if width < w_p else width
-            height += h + self.padding
-
         if not self.wrap_content:
             width = self.layout_width
-
-        if not self.wrap_content:
             height = self.layout_height
+        else:
+            for child in self.children:
+                w, h = child.measure()
+                w_p = w + self.padding
+                width = w_p if width < w_p else width
+                height += h + self.padding
 
         return width, height
 
@@ -217,17 +215,15 @@ class Row(Node):
     def measure(self):
         width = 0
         height = 0
-        for child in self.children:
-            w, h = child.measure()
-            h_p = h + self.padding
-            width += w + self.padding
-            height = h_p if height < h_p else height
-
         if not self.wrap_content:
             width = self.layout_width
-
-        if not self.wrap_content:
             height = self.layout_height
+        else:
+            for child in self.children:
+                w, h = child.measure()
+                h_p = h + self.padding
+                width += w + self.padding
+                height = h_p if height < h_p else height
 
         return width, height
 
