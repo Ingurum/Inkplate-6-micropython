@@ -66,7 +66,8 @@ class Column(Node):
         layout_height=0,
         wrap_content=True,
         align=ALIGN_LEFT,
-        padding=0
+        padding=0,
+        outline=False
     ):
         super().__init__(
             parent=parent,
@@ -76,6 +77,7 @@ class Column(Node):
             align=align,
             padding=padding
         )
+        self.outline = outline
         self.children = list()
 
     def add_node(self, node):
@@ -156,6 +158,9 @@ class Column(Node):
         idx = 0
         for child in self.children:
             w, h = measurements[idx]
+            outline = getattr(child, 'outline', False)
+            if outline:
+                display.drawRect(d_x, d_y, w, h, display.BLACK)
             child.draw(display, d_x, d_y)
             d_y += h + self.padding
             idx += 1
@@ -219,7 +224,8 @@ class Row(Node):
             layout_height=0,
             wrap_content=True,
             align=ALIGN_LEFT,
-            padding=0):
+            padding=0,
+            outline=True):
 
         super().__init__(
             parent=parent,
@@ -229,6 +235,7 @@ class Row(Node):
             align=align,
             padding=padding
         )
+        self.outline = outline
         self.children = list()
 
     def measure(self):
@@ -309,8 +316,9 @@ class Row(Node):
         idx = 0
         for child in self.children:
             w, h = measurements[idx]
-            # Debug
-            display.drawRect(d_x, d_y, w, h, display.BLACK)
+            outline = getattr(child, 'outline', False)
+            if outline:
+                display.drawRect(d_x, d_y, w, h, display.BLACK)
             child.draw(display, d_x, d_y)
             d_x += w + self.padding
             idx += 1

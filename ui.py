@@ -81,8 +81,10 @@ class UI:
             Column(
                 self.root,
                 layout_width=width // count,
-                wrap_content=False, # Fill parent
-                padding=10) for _ in range(count)
+                wrap_content=False,  # Fill parent
+                padding=10,
+                outline=True)
+            for _ in range(count)
         ]
         for column in columns:
             column.add_text_content('Line 1', align=ALIGN_CENTER)
