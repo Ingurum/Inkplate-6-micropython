@@ -370,7 +370,6 @@ class ImageNode(Node):
         self.image = image
         self.width = width
         self.height = height
-        self.reversed = reversed
 
     def measure(self):
         if self.wrap_content:

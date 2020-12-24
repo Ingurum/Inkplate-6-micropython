@@ -101,20 +101,25 @@ class UI:
             layout_height=height,
             padding=20
         )
-        row = Row(
+        header = Row(
             parent=self.root,
             layout_height=40,
             wrap_content=False
         )
-        row.add_text_content('Calendar', text_size=4)
-        row.add_image(CALENDAR_40_40, 40, 40, align=ALIGN_RIGHT)
-        content = Row(
+        header.add_text_content('Calendar', text_size=4)
+        header.add_image(CALENDAR_40_40, 40, 40, align=ALIGN_RIGHT)
+        content_root = Row(
             parent=self.root,
             layout_height=440,
             wrap_content=False,
             outline=True
         )
+        content = Column(
+            parent=content_root,
+            wrap_content=False
+        )
         content.add_spacer(10, outline=True)
+        content_root.add_node(content)
         status = Row(
             parent=self.root,
             layout_height=40,
@@ -122,9 +127,43 @@ class UI:
             outline=True
         )
         status.add_text_content('Last updated at <>', align=ALIGN_RIGHT)
-        self.root.add_node(row)
-        self.root.add_node(content)
+        self.root.add_node(header)
+        self.root.add_node(content_root)
         self.root.add_node(status)
+
+    def _build_auth(self, width, height):
+        self.root = Column(
+            layout_width=width,
+            layout_height=height,
+            padding=10
+        )
+        header = Row(
+            parent=self.root,
+            layout_height=40,
+            wrap_content=False
+        )
+        header.add_text_content('Calendar', text_size=4)
+        header.add_image(CALENDAR_40_40, 40, 40, align=ALIGN_RIGHT)
+        content_root = Row(
+            parent=self.root,
+            layout_height=520,
+            wrap_content=False,
+            outline=True
+        )
+        content = Column(
+            parent=content_root,
+            wrap_content=False
+        )
+        content.add_spacer(10, outline=True)
+        content.add_spacer(width // 4)
+        content.add_text_content('ABCD-EFGH', text_size=6, align=ALIGN_CENTER)
+        content.add_text_content(
+            'google.com/auth/code to continue',
+            align=ALIGN_CENTER
+        )
+        content_root.add_node(content)
+        self.root.add_node(header)
+        self.root.add_node(content_root)
 
     def draw(self):
         self.display.clean()
