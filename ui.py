@@ -1,6 +1,6 @@
+from images import CALENDAR_40_40
 from inkplate import Inkplate
 from layout import ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Column, Row
-from images import CALENDAR_32_32
 
 '''
 python pyboard.py --device /dev/ttyUSB0 -f cp layout.py text.py images.py :
@@ -20,8 +20,7 @@ class UI:
         self.display.begin()
         width = self.display.width()
         height = self.display.height()
-        # self._build_textual_interface(width, height)
-        self._columnar_interface(width, height)
+        self._build_calendar(width, height)
 
     def _build_textual_interface(self, width, height):
         self.root = Column(
@@ -93,8 +92,39 @@ class UI:
             column.add_text_content('Line 4', align=ALIGN_CENTER)
             column.add_text_content('Line 5', align=ALIGN_RIGHT)
             column.add_text_content('Line 6', align=ALIGN_LEFT)
-            column.add_image(CALENDAR_32_32, 32,  32, align=ALIGN_CENTER)
+            column.add_image(CALENDAR_40_40, 40,  40, align=ALIGN_CENTER)
             self.root.add_node(column)
+
+    def _build_calendar(self, width, height):
+        self.root = Column(
+            layout_width=width,
+            layout_height=height,
+            padding=20
+        )
+        row = Row(
+            parent=self.root,
+            layout_height=40,
+            wrap_content=False
+        )
+        row.add_text_content('Calendar', text_size=4)
+        row.add_image(CALENDAR_40_40, 40, 40, align=ALIGN_RIGHT)
+        content = Row(
+            parent=self.root,
+            layout_height=440,
+            wrap_content=False,
+            outline=True
+        )
+        content.add_spacer(10, outline=True)
+        status = Row(
+            parent=self.root,
+            layout_height=40,
+            wrap_content=False,
+            outline=True
+        )
+        status.add_text_content('Last updated at <>', align=ALIGN_RIGHT)
+        self.root.add_node(row)
+        self.root.add_node(content)
+        self.root.add_node(status)
 
     def draw(self):
         self.display.clean()

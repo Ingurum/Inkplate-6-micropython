@@ -1,4 +1,3 @@
-from inkplate import Inkplate
 from text import Text
 
 # Text alignments
@@ -84,8 +83,8 @@ class Column(Node):
         if isinstance(node, Node):
             self.children.append(node)
 
-    def add_spacer(self, height):
-        node = Spacer(self, height)
+    def add_spacer(self, height, outline=False):
+        node = Spacer(self, height, outline=outline)
         self.add_node(node)
 
     def add_text_content(self, content, text_size=3, align=ALIGN_LEFT):
@@ -225,7 +224,7 @@ class Row(Node):
             wrap_content=True,
             align=ALIGN_LEFT,
             padding=0,
-            outline=True):
+            outline=False):
 
         super().__init__(
             parent=parent,
@@ -257,8 +256,8 @@ class Row(Node):
         if isinstance(node, Node):
             self.children.append(node)
 
-    def add_spacer(self, height):
-        node = Spacer(self, height, padding=self.padding)
+    def add_spacer(self, height, outline=False):
+        node = Spacer(self, height, padding=self.padding, outline=outline)
         self.add_node(node)
 
     def add_text_content(self, content, text_size=3, align=ALIGN_LEFT):
@@ -319,6 +318,9 @@ class Row(Node):
             outline = getattr(child, 'outline', False)
             if outline:
                 display.drawRect(d_x, d_y, w, h, display.BLACK)
+            if child.align == ALIGN_CENTER or child.align == ALIGN_RIGHT:
+                # Alignments are always with respect to parent
+                d_x = x
             child.draw(display, d_x, d_y)
             d_x += w + self.padding
             idx += 1
@@ -329,24 +331,19 @@ class Spacer(Node):
     A Spacer that represents an empty space.
     '''
 
-    def __init__(self, parent, height, padding=0):
+    def __init__(self, parent, height, padding=0, outline=False):
         # Note: This should not wrap content.
         super().__init__(parent=parent, padding=padding)
         self.width = self.layout_width
         self.height = height
+        self.outline = outline
 
     def measure(self):
         return self.width, self.height
 
     def draw(self, display, x, y):
-        # Debug
-        display.drawRect(
-            x,
-            y,
-            self.width,
-            self.height,
-            display.BLACK
-        )
+        # Does nothing
+        pass
 
 
 class ImageNode(Node):
