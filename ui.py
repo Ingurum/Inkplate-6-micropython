@@ -1,3 +1,5 @@
+import time
+
 from images import CALENDAR_40_40
 from inkplate import Inkplate
 from layout import ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Column, Row
@@ -18,14 +20,14 @@ class UI:
     def __init__(self):
         self.display = Inkplate(Inkplate.INKPLATE_1BIT)
         self.display.begin()
-        width = self.display.width()
-        height = self.display.height()
-        self._build_calendar(width, height)
+        self.width = self.display.width()
+        self.height = self.display.height()
+        self._build_calendar()
 
-    def _build_textual_interface(self, width, height):
+    def _build_textual_interface(self):
         self.root = Column(
-            layout_width=width,
-            layout_height=height,
+            layout_width=self.width,
+            layout_height=self.height,
             padding=20
         )
         # Nested Column
@@ -67,10 +69,10 @@ class UI:
             align=ALIGN_CENTER
         )
 
-    def _columnar_interface(self, width, height):
+    def _columnar_interface(self):
         self.root = Row(
-            layout_width=width,
-            layout_height=height,
+            layout_width=self.width,
+            layout_height=self.height,
             padding=5,
             align=ALIGN_CENTER
         )
@@ -79,7 +81,7 @@ class UI:
         columns = [
             Column(
                 self.root,
-                layout_width=width // count,
+                layout_width=self.width // count,
                 wrap_content=False,  # Fill parent
                 padding=10,
                 outline=True)
@@ -95,10 +97,10 @@ class UI:
             column.add_image(CALENDAR_40_40, 40,  40, align=ALIGN_CENTER)
             self.root.add_node(column)
 
-    def _build_calendar(self, width, height):
+    def _build_calendar(self):
         self.root = Column(
-            layout_width=width,
-            layout_height=height,
+            layout_width=self.width,
+            layout_height=self.height,
             padding=20
         )
         header = Row(
@@ -131,10 +133,10 @@ class UI:
         self.root.add_node(content_root)
         self.root.add_node(status)
 
-    def _build_auth(self, width, height):
+    def _build_auth(self):
         self.root = Column(
-            layout_width=width,
-            layout_height=height,
+            layout_width=self.width,
+            layout_height=self.height,
             padding=10
         )
         header = Row(
@@ -155,7 +157,7 @@ class UI:
             wrap_content=False
         )
         content.add_spacer(10, outline=True)
-        content.add_spacer(width // 4)
+        content.add_spacer(self.width // 4)
         content.add_text_content('ABCD-EFGH', text_size=6, align=ALIGN_CENTER)
         content.add_text_content(
             'google.com/auth/code to continue',
@@ -166,7 +168,7 @@ class UI:
         self.root.add_node(content_root)
 
     def draw(self):
-        self.display.clean()
+        self.display.clearDisplay()
         self.root.draw(self.display, 0, 0)
         self.display.display()
 
@@ -174,3 +176,10 @@ class UI:
 if __name__ == '__main__':
     ui = UI()
     ui.draw()
+    time.sleep(5)
+    ui._build_auth()
+    ui.draw()
+    time.sleep(5)
+    ui._build_calendar()
+    ui.draw()
+    time.sleep(5)

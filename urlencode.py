@@ -12,11 +12,6 @@ def quote(s):
         res.append('%%%x' % ord(c))
     return ''.join(res)
 
-def quote_plus(s):
-    if ' ' in s:
-        s = s.replace(' ', '+')
-    return quote(s)
-
 def urlencode(query):
     if isinstance(query, dict):
         query = query.items()
@@ -25,7 +20,7 @@ def urlencode(query):
         if not isinstance(v, list):
             v = [v]
         for value in v:
-            k = quote_plus(str(k))
-            v = quote_plus(str(value))
+            k = quote(str(k))
+            v = quote(str(value))
             l.append(k + '=' + v)
     return '&'.join(l)

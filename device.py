@@ -238,7 +238,7 @@ class DeviceAuth:
             payload['token_acquired_at'] = self._token_acquired_at
 
         try:
-            with open(self.location, 'w') as handle:
+            with open(self.saved_location, 'w') as handle:
                 json.dump(payload, handle)
                 print('Saved auth state.')
 

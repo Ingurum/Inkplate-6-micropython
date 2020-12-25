@@ -23,6 +23,7 @@ python pyboard.py --device /dev/ttyUSB0 -f cp app.py config.py device.py images.
 python pyboard.py --device /dev/ttyUSB0 app.py
 '''
 
+
 class App:
     '''
     The Calendar App.
@@ -64,7 +65,10 @@ class App:
             return
 
         config = wlan.ifconfig()
-        print('Connected with config %s' % (config))
+        print('Connected with config', config)
+        self._notify('Initializing', messages=[
+            'Sync-ing real time clocks with Network'
+        ])
         print('Sync-ing network time.')
         ntptime.settime()
         self.connecting = False
@@ -89,35 +93,35 @@ class App:
             self.device_auth.discover()
             self.authorizing = True
             self.device_auth.authorize()
-            self._build_auth_ui()
-            self.device_auth.check_authorization_complete(max_attempts=20)
+            user_code = self.device_auth.user_code
+            verification_url = self.device_auth.verification_url
+            current_attempt = 0
+            max_attempts = 20
+            while not self.device_auth.authorized and current_attempt < max_attempts:
+                messages = [
+                    '%s to continue' % (verification_url),
+                    'Attempt %s of %s' % (current_attempt + 1, max_attempts)
+                ]
+                self._notify(user_code, messages=messages)
+                self.device_auth.check_authorization_complete(max_attempts=1)
+                time.sleep(5)  # Sleep duration in seconds.
+                current_attempt += 1
+
             if not self.device_auth.authorized:
                 message = 'Unable to authorize the application.'
                 self._error(message=message)
                 return
-        
+
         self._notify('Syncing', messages=[
             'Updating calendar events'
         ])
-
-    def _build_auth_ui(self):
-        if not self.device_auth._authorization_started:
-            print('Cannot build Auth UI unless authorization started.')
-            return
-
-        user_code = self.device_auth.user_code
-        verification_url = self.device_auth.verification_url
-        messages = [
-            '%s to continue' % (verification_url)
-        ]
-        self._notify(user_code, messages=messages)
 
     def _error(self, message):
         messages = [message]
         print(message)
         self._notify('Error', messages=messages)
 
-    def _notify(self, header, messages=list()):
+    def _notify(self, title, messages=list()):
         root = Column(
             layout_width=self.width,
             layout_height=self.height,
@@ -142,13 +146,21 @@ class App:
         )
         content.add_spacer(10, outline=True)
         content.add_spacer(self.width // 4)
-        content.add_text_content(header, text_size=6, align=ALIGN_CENTER)
+        content.add_text_content(title, text_size=6, align=ALIGN_CENTER)
         for message in messages:
             content.add_text_content(message, align=ALIGN_CENTER)
         content_root.add_node(content)
+        root.add_node(header)
+        root.add_node(content_root)
         self._draw(root)
 
     def _draw(self, node):
-        self.display.clean()
+        self.display.clearDisplay()
         node.draw(self.display, 0, 0)
         self.display.display()
+
+
+if __name__ == '__main__':
+    app = App()
+    print('Initializing app.')
+    app.initialize()
