@@ -1,5 +1,6 @@
 board_config.py
 board_config_*.py
+config.py
 init.mpf
 lib
 __pycache__
