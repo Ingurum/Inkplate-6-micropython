@@ -150,6 +150,7 @@ class DeviceAuth:
                 self._refresh_token = j['refresh_token']
                 print('Completed authorization')
                 self._authorization_completed = True
+                self.save()
 
     @property
     def authorized(self):
