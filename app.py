@@ -17,6 +17,11 @@ from inkplate import Inkplate
 from layout import ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, Column, Row
 from device import DeviceAuth
 
+# Shell
+'''
+picocom /dev/ttyUSB0 -b115200
+'''
+
 # Copy files.
 '''
 python pyboard.py --device /dev/ttyUSB0 -f cp app.py config.py device.py images.py layout.py path.py text.py urlencode.py :
