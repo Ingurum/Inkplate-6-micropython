@@ -5,7 +5,7 @@ import time
 import urequests as requests
 
 from path import exists
-from urlencode import urlencode
+from utils import urlencode
 
 
 class DeviceAuth:

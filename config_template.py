@@ -3,6 +3,7 @@
 # OAuth2 Configuration
 # Look at: https://developers.google.com/identity/protocols/oauth2/limited-input-device
 
+API_KEY = '<your_api_key'
 CLIENT_ID = '<your_client_id>'
 CLIENT_SECRET = '<your_client_secret>'
 DISCOVERY_ENDPOINT = 'https://accounts.google.com/.well-known/openid-configuration'
@@ -19,3 +20,6 @@ SAVED_LOCATION =  'tokens.json'
 # Wireless Config
 WLAN_SSID = '<your_ssid>'
 WLAN_PASSWORD = '<your_password>'
+
+# Time Zone Configuration
+UTC_OFFSET = -8.0
