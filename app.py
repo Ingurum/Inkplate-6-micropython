@@ -3,19 +3,22 @@ import time
 import network
 import ntptime
 
+from calendar_api import Calendar
 from config import (
     CLIENT_ID,
     CLIENT_SECRET,
     DISCOVERY_ENDPOINT,
     SAVED_LOCATION,
     SCOPES,
+    UTC_OFFSET,
     WLAN_PASSWORD,
     WLAN_SSID
 )
+from device import DeviceAuth
 from images import CALENDAR_40_40
 from inkplate import Inkplate
 from layout import ALIGN_CENTER, ALIGN_RIGHT, Column, Row
-from device import DeviceAuth
+from utils import DateTime, time
 
 # Shell
 '''
@@ -45,6 +48,8 @@ class App:
         # Auth state
         self.authorizing = False
         self.authorized = False
+        # Calender
+        self.calendar = None
 
     def connect_to_network(self):
         '''
@@ -120,6 +125,72 @@ class App:
         self._notify('Syncing', messages=[
             'Updating calendar events'
         ])
+        self.build_calendar_ui()
+
+
+    def build_calendar_ui(self):
+        '''
+        Builds the actual Calendar UI after making the RESTful request.
+        '''
+        if not self.device_auth.authorized:
+            self._error('Need to authorize first.')
+
+        if not self.calendar:
+            self.calendar = Calendar(self.device_auth)
+
+        events = self.calendar.events(limit=10)
+        events = list(filter(lambda event: event.start_at.is_today(), events))
+        sync_at = DateTime(time(offset=UTC_OFFSET)).formatted()
+        sync_at_message = 'Last updated at %s' % (sync_at)
+        if len(events) <= 0:
+            messages = [
+                sync_at_message
+            ]
+            self._notify('Nothing much today', messages=messages)
+        else:
+            root = Column(
+                layout_width=self.width,
+                layout_height=self.height,
+                padding=10
+            )
+            header = Row(
+                parent=root,
+                layout_height=40,
+                wrap_content=False
+            )
+            header.add_text_content('Calendar', text_size=4)
+            header.add_image(CALENDAR_40_40, 40, 40, align=ALIGN_RIGHT)
+            content_root = Row(
+                parent=root,
+                layout_height=440,
+                wrap_content=False,
+                outline=True
+            )
+            content = Column(
+                parent=content_root,
+                wrap_content=False
+            )
+            content.add_spacer(20, outline=True)
+            content.add_text_content('Today', text_size=4)
+            content.add_spacer(20)
+            for event in events:
+                summary = event.summary
+                at = 'At %s' % event.start_at.formatted()
+                content.add_text_content(summary)
+                content.add_text_content(at)
+                content.add_spacer(height=10)
+            content_root.add_node(content)
+            status = Row(
+                parent=root,
+                layout_height=40,
+                wrap_content=False,
+                outline=True
+            )
+            status.add_text_content(sync_at_message, align=ALIGN_RIGHT)
+            root.add_node(header)
+            root.add_node(content_root)
+            root.add_node(status)
+            self._draw(root)
 
     def _error(self, message):
         messages = [message]

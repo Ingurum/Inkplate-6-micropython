@@ -107,7 +107,7 @@ class DateTime:
         year, month, day, hours, minutes, _, _, _ = utime.localtime(
             self.epoch_s)
         y_m_d = '%s-%s-%s' % (year, month, day) if full_date == True else ''
-        suffix = 'PM' if hours > 12 else 'AM'
+        suffix = 'PM' if hours >= 12 else 'AM'
         f_hours = hours % 12
         h_m = '%s:%s %s' % (f_hours, minutes, suffix)
         return '%s%s' % (y_m_d, h_m)
