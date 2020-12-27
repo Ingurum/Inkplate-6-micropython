@@ -204,10 +204,9 @@ class DeviceAuth:
             self._token_expires_in = j['expires_in']
             self._token_scope = j['scope']
             self._token_type = j['token_type']
-
-        saved = self.save()
-        if not saved:
-            print('Unable to store auth state.')
+            saved = self.save()
+            if not saved:
+                print('Unable to store auth state.')
 
         return self._access_token
 
@@ -239,6 +238,7 @@ class DeviceAuth:
             payload['refresh_token'] = self._refresh_token
             payload['access_token'] = self._access_token
             payload['token_acquired_at'] = self._token_acquired_at
+            payload['token_expires_in'] = self._token_expires_in
 
         try:
             with open(self.saved_location, 'w') as handle:
@@ -288,10 +288,12 @@ class DeviceAuth:
                     refresh_token = payload['refresh_token']
                     access_token = payload['access_token']
                     token_acquired_at = payload['token_acquired_at']
+                    token_expires_in = payload['token_expires_in']
                     device_auth._authorization_completed = True
                     device_auth._refresh_token = refresh_token
                     device_auth._access_token = access_token
                     device_auth._token_acquired_at = token_acquired_at
+                    device_auth._token_expires_in = token_expires_in
 
                 return device_auth
         except Exception as error:

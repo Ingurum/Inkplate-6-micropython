@@ -1,5 +1,4 @@
 import urequests as requests
-import utime
 
 from config import API_KEY
 from utils import DateTime, today, urlencode
@@ -43,7 +42,7 @@ class Calendar:
         r.close()
 
         if 'error' in j:
-            raise RuntimeError(j['message'])
+            raise RuntimeError(j)
 
         return self._parse_calendar_events(j)
 

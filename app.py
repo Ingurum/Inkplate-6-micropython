@@ -24,7 +24,7 @@ picocom /dev/ttyUSB0 -b115200
 
 # Copy files.
 '''
-python pyboard.py --device /dev/ttyUSB0 -f cp app.py config.py device.py images.py layout.py path.py text.py utils.py :
+python pyboard.py --device /dev/ttyUSB0 -f cp app.py config.py calendar_api.py device.py images.py layout.py path.py text.py utils.py :
 python pyboard.py --device /dev/ttyUSB0 app.py
 '''
 
