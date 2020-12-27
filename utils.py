@@ -105,11 +105,12 @@ class DateTime:
 
     def formatted(self, full_date=False):
         year, month, day, hours, minutes, _, _, _ = utime.localtime(
-            self.epoch_s)
-        y_m_d = '%s-%s-%s' % (year, month, day) if full_date == True else ''
+            self.epoch_s
+        )
+        y_m_d = '{:04d}-{:02d}-{:02d}'.format(year, month, day) if full_date == True else ''
         suffix = 'PM' if hours >= 12 else 'AM'
         f_hours = hours % 12
-        h_m = '%s:%s %s' % (f_hours, minutes, suffix)
+        h_m = '{:02d}:{:02d}{:s}'.format(f_hours, minutes, suffix)
         return '%s%s' % (y_m_d, h_m)
 
     @classmethod

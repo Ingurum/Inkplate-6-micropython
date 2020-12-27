@@ -170,7 +170,8 @@ class App:
                 parent=content_root,
                 wrap_content=False
             )
-            content.add_spacer(20, outline=True)
+            content.add_spacer(10, outline=True)
+            content.add_spacer(20)
             content.add_text_content('Today', text_size=4)
             content.add_spacer(20)
             for event in events:
