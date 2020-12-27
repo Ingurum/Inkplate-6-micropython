@@ -1,7 +1,7 @@
 import urequests as requests
 
 from config import API_KEY
-from utils import DateTime, today, urlencode
+from utils import DateTime, today_rfc3339, urlencode
 
 
 class Calendar:
@@ -14,10 +14,10 @@ class Calendar:
         if not self.device_auth.authorized:
             raise RuntimeError('Unauthorized.')
 
-    def events(self, limit=20):
+    def events(self, limit=5):
         # Calendar id is part of the endpoint iself.
         endpoint = 'https://www.googleapis.com/calendar/v3/calendars/primary/events'
-        start_time = today()
+        start_time = today_rfc3339(hours_offset=-1)
         token = self.device_auth.token()
         authorization = 'Bearer %s' % (token)
         headers = {

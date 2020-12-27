@@ -31,7 +31,7 @@ def urlencode(query):
     return '&'.join(l)
 
 
-def time(offset=0):
+def time_as_utime(offset=0):
     '''
     Returns the number of seconds since UTC epoch adjusted to the 
     calendar timezone.
@@ -43,14 +43,15 @@ def time(offset=0):
     return utime.mktime(utime.localtime(t))
 
 
-def today():
+def today_rfc3339(hours_offset=0):
     '''
     Return `today`s date
     '''
 
-    now = time(offset=UTC_OFFSET)
-    (year, month, day, _, _, _, _, _) = utime.localtime(now)
-    t = utime.mktime((year, month, day, 0, 0, 0, 0, 0))
+    now = time_as_utime(offset=UTC_OFFSET)
+    (year, month, day, hours, _, _, _, _) = utime.localtime(now)
+    hours += hours_offset
+    t = utime.mktime((year, month, day, hours, 0, 0, 0, 0))
     return format_time(t, tz=UTC_OFFSET)
 
 
@@ -94,7 +95,7 @@ class DateTime:
         self.tz = tz
 
     def is_today(self):
-        today = time(self.tz)
+        today = time_as_utime(self.tz)
         year1, month1, day1, _, _, _, _, _ = utime.localtime(today)
         year2, month2, day2, _, _, _, _, _ = utime.localtime(self.epoch_s)
         return (
@@ -103,14 +104,14 @@ class DateTime:
             day1 == day2
         )
 
-    def formatted(self, full_date=False):
+    def formatted(self, include_day=False, include_time=True):
         year, month, day, hours, minutes, _, _, _ = utime.localtime(
             self.epoch_s
         )
-        y_m_d = '{:04d}-{:02d}-{:02d}'.format(year, month, day) if full_date == True else ''
+        y_m_d = '{:04d}-{:02d}-{:02d} '.format(year, month, day) if include_day == True else ''
         suffix = 'PM' if hours >= 12 else 'AM'
         f_hours = hours % 12
-        h_m = '{:02d}:{:02d}{:s}'.format(f_hours, minutes, suffix)
+        h_m = '{:02d}:{:02d} {:s}'.format(f_hours, minutes, suffix) if include_time else ''
         return '%s%s' % (y_m_d, h_m)
 
     @classmethod
@@ -148,3 +149,8 @@ class DateTime:
             tz = m * (hour_offset + minutes_f)
 
         return DateTime(epoch_s, tz)
+
+    @classmethod
+    def today(cls, tz=UTC_OFFSET):
+        epoch_s = time_as_utime(tz)
+        return DateTime(epoch_s=epoch_s)

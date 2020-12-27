@@ -18,7 +18,7 @@ from device import DeviceAuth
 from images import CALENDAR_40_40
 from inkplate import Inkplate
 from layout import ALIGN_CENTER, ALIGN_RIGHT, Column, Row
-from utils import DateTime, time
+from utils import DateTime
 
 # Shell
 '''
@@ -80,15 +80,27 @@ class App:
             'Sync-ing real time clocks with Network'
         ])
         print('Sync-ing network time.')
-        ntptime.settime()
+        delay = 0
+        time_set = False
+        while wlan.isconnected() and not time_set and delay < 10:
+            try:
+                ntptime.settime()
+                time_set = True
+            except Exception:
+                time.sleep_ms(200)
+                delay += 1
+
         self.connecting = False
-        self.connected = True
+        self.connected = wlan.isconnected() and time_set
 
     def initialize(self):
         '''
         Initialize App.
         '''
         self.connect_to_network()
+        if not self.connected:
+            return
+
         self.device_auth = DeviceAuth.from_file(SAVED_LOCATION)
         if not self.device_auth or self.device_auth.authorized == False:
             #  Initialize auth
@@ -138,15 +150,15 @@ class App:
         if not self.calendar:
             self.calendar = Calendar(self.device_auth)
 
-        events = self.calendar.events(limit=10)
-        events = list(filter(lambda event: event.start_at.is_today(), events))
-        sync_at = DateTime(time(offset=UTC_OFFSET)).formatted()
+        events = self.calendar.events()
+        date_today = DateTime.today()
+        sync_at = date_today.formatted()
         sync_at_message = 'Last updated at %s' % (sync_at)
         if len(events) <= 0:
             messages = [
                 sync_at_message
             ]
-            self._notify('Nothing much today', messages=messages)
+            self._notify('No events.', messages=messages)
         else:
             root = Column(
                 layout_width=self.width,
@@ -158,11 +170,12 @@ class App:
                 layout_height=40,
                 wrap_content=False
             )
-            header.add_text_content('Calendar', text_size=4)
+            f_date_today = date_today.formatted(include_day=True, include_time=False)
+            header.add_text_content('Today - %s' % (f_date_today), text_size=4)
             header.add_image(CALENDAR_40_40, 40, 40, align=ALIGN_RIGHT)
             content_root = Row(
                 parent=root,
-                layout_height=440,
+                layout_height=480,
                 wrap_content=False,
                 outline=True
             )
@@ -172,14 +185,15 @@ class App:
             )
             content.add_spacer(10, outline=True)
             content.add_spacer(20)
-            content.add_text_content('Today', text_size=4)
-            content.add_spacer(20)
             for event in events:
                 summary = event.summary
-                at = 'At %s' % event.start_at.formatted()
+                include_day = not event.start_at.is_today()
+                at = 'At %s' % (
+                    event.start_at.formatted(include_day=include_day)
+                )
                 content.add_text_content(summary)
                 content.add_text_content(at)
-                content.add_spacer(height=10)
+                content.add_spacer(height=15)
             content_root.add_node(content)
             status = Row(
                 parent=root,
