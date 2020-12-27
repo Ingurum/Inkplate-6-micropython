@@ -51,14 +51,16 @@ class App:
         # Calender
         self.calendar = None
 
-    def connect_to_network(self):
+    def connect_to_network(self, notify=True):
         '''
         Connects to WiFi, and sync-s Network time
         '''
 
-        self._notify('Initializing', messages=[
-            'Connecting to %s' % (WLAN_SSID)
-        ])
+        if notify:
+            self._notify('Initializing', messages=[
+                'Connecting to %s' % (WLAN_SSID)
+            ])
+
         wlan = network.WLAN(network.STA_IF)
         wlan.active(True)
         delay = 0
@@ -76,9 +78,12 @@ class App:
 
         config = wlan.ifconfig()
         print('Connected with config', config)
-        self._notify('Initializing', messages=[
-            'Sync-ing real time clocks with Network'
-        ])
+
+        if notify:
+            self._notify('Initializing', messages=[
+                'Sync-ing real time clocks with Network'
+            ])
+
         print('Sync-ing network time.')
         delay = 0
         time_set = False
@@ -93,11 +98,11 @@ class App:
         self.connecting = False
         self.connected = wlan.isconnected() and time_set
 
-    def initialize(self):
+    def initialize(self, notify=True):
         '''
         Initialize App.
         '''
-        self.connect_to_network()
+        self.connect_to_network(notify=notify)
         if not self.connected:
             return
 

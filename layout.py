@@ -87,11 +87,12 @@ class Column(Node):
         node = Spacer(self, height, outline=outline)
         self.add_node(node)
 
-    def add_text_content(self, content, text_size=3, align=ALIGN_LEFT):
+    def add_text_content(self, content, text_size=3, padding=5, align=ALIGN_LEFT):
         node = TextNode(
             parent=self,
             content=content,
             text_size=text_size,
+            padding=padding,
             align=align
         )
         self.add_node(node)
