@@ -150,7 +150,9 @@ class DeviceAuth:
                 self._refresh_token = j['refresh_token']
                 print('Completed authorization')
                 self._authorization_completed = True
-                self.save()
+                saved = self.save()
+                if not saved:
+                    print('Unable to save auth state.')
 
     @property
     def authorized(self):

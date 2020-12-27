@@ -1,6 +1,8 @@
 import math
+
 import utime
 
+from config import UTC_OFFSET
 
 always_safe = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-'
 
@@ -41,6 +43,17 @@ def time(offset=0):
     return utime.mktime(utime.localtime(t))
 
 
+def today():
+    '''
+    Return `today`s date
+    '''
+
+    now = time(offset=UTC_OFFSET)
+    (year, month, day, _, _, _, _, _) = utime.localtime(now)
+    t = utime.mktime((year, month, day, 0, 0, 0, 0, 0))
+    return format_time(t, tz=UTC_OFFSET)
+
+
 def format_time(t, tz=0.):
     '''
     Formats a timestamp based on RFC 3339
@@ -69,3 +82,68 @@ def format_tz(tz):
 
     sign = '+' if tz > 0 else '-'
     return '{:s}{:02d}:{:02d}'.format(sign, hours, minutes)
+
+
+class DateTime:
+    '''
+    Represents a date and time with a UTF offset.
+    '''
+
+    def __init__(self, epoch_s, tz=0.):
+        self.epoch_s = epoch_s
+        self.tz = tz
+
+    def is_today(self):
+        today = time(self.tz)
+        year1, month1, day1, _, _, _, _, _ = utime.localtime(today)
+        year2, month2, day2, _, _, _, _, _ = utime.localtime(self.epoch_s)
+        return (
+            year1 == year2 and
+            month1 == month2 and
+            day1 == day2
+        )
+
+    def formatted(self, full_date=False):
+        year, month, day, hours, minutes, _, _, _ = utime.localtime(
+            self.epoch_s)
+        y_m_d = '%s-%s-%s' % (year, month, day) if full_date == True else ''
+        suffix = 'PM' if hours > 12 else 'AM'
+        f_hours = hours % 12
+        h_m = '%s:%s %s' % (f_hours, minutes, suffix)
+        return '%s%s' % (y_m_d, h_m)
+
+    @classmethod
+    def from_str(cls, formatted):
+        '''
+        Creates an instance of DateTime using a formatted string.
+        '''
+        # 0123456790123456789012345
+        # 2020-12-24T18:30:00-08:00
+        if len(formatted) < 20:
+            raise RuntimeError('Invalid formatted string')
+
+        year = int(formatted[0:4])
+        month = int(formatted[5:7])
+        day = int(formatted[8:10])
+        hours = int(formatted[11:13])
+        minutes = int(formatted[14:16])
+        seconds = int(formatted[17:19])
+
+        epoch_s = utime.mktime(
+            (year, month, day, hours, minutes, seconds, 0, 0)
+        )
+
+        tz = 0.
+        sign = formatted[19]
+        # Multiplicative factor
+        m = 1.
+        hour_offset = 0
+        minutes_offset = 0
+        if sign != 'Z' and len(formatted[19:]) == 6:
+            m = -1. if sign == '-' else 1
+            hour_offset = int(formatted[20:22])
+            minutes_offset = int(formatted[23:])
+            minutes_f = minutes_offset / 60.
+            tz = m * (hour_offset + minutes_f)
+
+        return DateTime(epoch_s, tz)

@@ -2,7 +2,7 @@ import urequests as requests
 import utime
 
 from config import API_KEY
-from utils import format_time, time, urlencode
+from utils import DateTime, today, urlencode
 
 
 class Calendar:
@@ -18,7 +18,7 @@ class Calendar:
     def events(self, limit=20):
         # Calendar id is part of the endpoint iself.
         endpoint = 'https://www.googleapis.com/calendar/v3/calendars/primary/events'
-        start_time = format_time(time())
+        start_time = today()
         token = self.device_auth.token()
         authorization = 'Bearer %s' % (token)
         headers = {
@@ -33,10 +33,10 @@ class Calendar:
             'key': API_KEY
         }
         encoded = urlencode(payload)
+        full_url = '%s?%s' % (endpoint, encoded)
         r = requests.request(
             'GET',
-            endpoint,
-            data=encoded,
+            full_url,
             headers=headers
         )
         j = r.json()
@@ -69,26 +69,6 @@ class Event:
     def __init__(self, j):
         self.summary = j['summary']
         self.description = j['description']
-        # 2020-11-18T01:17:18.000Z
-        self.start_at = j['start']['dateTime']
-
-    def _year(self):
-        return int(self.start_at[0:4])
-
-    def _month(self):
-        return int(self.start_at[5:7])
-
-    def _day(self):
-        return int(self.start_at[8:10])
-
-    def _hours(self):
-        return int(self.start_at[11:13])
-
-    def _minutes(self):
-        return int(self.start_at[14:16])
-
-    def _seconds(self):
-        return int(self.start_at[17:19])
-
-    def formatted_time(self):
-        pass
+        # 2020-12-24T18:30:00-08:00
+        formatted = j['start']['dateTime']
+        self.start_at = DateTime.from_str(formatted)
