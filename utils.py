@@ -121,22 +121,29 @@ class DateTime:
         '''
         # 0123456790123456789012345
         # 2020-12-24T18:30:00-08:00
-        if len(formatted) < 20:
+
+        if len(formatted) < 10:
             raise RuntimeError('Invalid formatted string')
 
         year = int(formatted[0:4])
         month = int(formatted[5:7])
         day = int(formatted[8:10])
-        hours = int(formatted[11:13])
-        minutes = int(formatted[14:16])
-        seconds = int(formatted[17:19])
+
+        hours = 0
+        minutes = 0
+        seconds = 0
+
+        if len(formatted) > 10:
+            hours = int(formatted[11:13])
+            minutes = int(formatted[14:16])
+            seconds = int(formatted[17:19])
 
         epoch_s = utime.mktime(
             (year, month, day, hours, minutes, seconds, 0, 0)
         )
 
         tz = 0.
-        sign = formatted[19]
+        sign = formatted[19] if len(formatted) >= 20 else 'Z'
         # Multiplicative factor
         m = 1.
         hour_offset = 0

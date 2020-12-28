@@ -4,3 +4,4 @@ config.py
 init.mpf
 lib
 __pycache__
+.vscode/.ropeproject/objectdb

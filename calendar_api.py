@@ -67,7 +67,18 @@ class Event:
 
     def __init__(self, j):
         self.summary = j['summary']
-        self.description = j['description']
-        # 2020-12-24T18:30:00-08:00
-        formatted = j['start']['dateTime']
-        self.start_at = DateTime.from_str(formatted)
+
+        self.description = None
+        self.start_at = None
+        self.end_at = None
+
+        if 'description' in j:
+            self.description = j['description']
+        if 'start' in j and 'dateTime' in j['start']:
+            # 2020-12-24T18:30:00-08:00
+            formatted = j['start']['dateTime']
+            self.start_at = DateTime.from_str(formatted)
+        if 'end' in j and 'date' in j['end']:
+            # '2021-01-02'
+            formatted = j['end']['date']
+            self.end_at = DateTime.from_str(formatted)

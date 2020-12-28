@@ -203,12 +203,20 @@ class App:
             content.add_spacer(20)
             for event in events:
                 summary = event.summary
-                include_day = not event.start_at.is_today()
-                at = 'At %s' % (
-                    event.start_at.formatted(include_day=include_day)
-                )
+                duration_info = None
+                if event.start_at:
+                    include_day = not event.start_at.is_today()
+                    duration_info = 'At %s' % (
+                        event.start_at.formatted(include_day=include_day)
+                    )
+                elif event.end_at:
+                    duration_info = 'Ends at %s' % (
+                        event.end_at.formatted(include_day=True, include_time=False)
+                    )
+
                 content.add_text_content(summary)
-                content.add_text_content(at)
+                if duration_info:
+                    content.add_text_content(duration_info)
                 content.add_spacer(height=15)
             content_root.add_node(content)
             status = Row(
