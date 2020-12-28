@@ -1,4 +1,4 @@
-from text import Text
+from text import _WIDTHS, Text
 
 # Text alignments
 
@@ -88,12 +88,15 @@ class Column(Node):
         self.add_node(node)
 
     def add_text_content(self, content, text_size=3, padding=5, align=ALIGN_LEFT):
-        node = TextNode(
-            parent=self,
-            content=content,
-            text_size=text_size,
-            padding=padding,
-            align=align
+        node = TextNode.overflow(
+            TextNode(
+                parent=self,
+                content=content,
+                text_size=text_size,
+                padding=padding,
+                align=align
+            ),
+            self.layout_width
         )
         self.add_node(node)
 
@@ -211,6 +214,25 @@ class TextNode(Node):
             self.text.content
         )
 
+    @classmethod
+    def overflow(cls, node, target_width):
+        '''
+        This can use a lot of improvement.
+        '''
+
+        mw = node.text.measured_width()
+        if mw < target_width:
+            return node
+
+        index = (target_width // _WIDTHS[node.text_size]) - 4
+        ellipsized = node.text.content[:index]
+        return TextNode(
+            content='%s...' % ellipsized,
+            parent=node.parent,
+            text_size=node.text_size,
+            padding=node.padding
+        )
+
 
 class Row(Node):
     '''
@@ -262,11 +284,14 @@ class Row(Node):
         self.add_node(node)
 
     def add_text_content(self, content, text_size=3, align=ALIGN_LEFT):
-        node = TextNode(
-            parent=self,
-            content=content,
-            text_size=text_size,
-            align=align
+        node = TextNode.overflow(
+            TextNode(
+                parent=self,
+                content=content,
+                text_size=text_size,
+                align=align
+            ),
+            self.layout_width
         )
         self.add_node(node)
 

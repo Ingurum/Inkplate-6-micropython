@@ -22,7 +22,7 @@ class UI:
         self.display.begin()
         self.width = self.display.width()
         self.height = self.display.height()
-        self._build_calendar()
+        self._columnar_interface()
 
     def _build_textual_interface(self):
         self.root = Column(
@@ -88,7 +88,7 @@ class UI:
             for _ in range(count)
         ]
         for column in columns:
-            column.add_text_content('Line 1', align=ALIGN_CENTER)
+            column.add_text_content('Line 1 happens to be long', align=ALIGN_CENTER)
             column.add_text_content('Line 2', align=ALIGN_CENTER)
             column.add_text_content('Line 3', align=ALIGN_CENTER)
             column.add_text_content('Line 4', align=ALIGN_CENTER)
