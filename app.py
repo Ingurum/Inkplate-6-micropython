@@ -1,5 +1,6 @@
 import time
 
+import machine
 import network
 import ntptime
 
@@ -10,7 +11,7 @@ from config import (
     DISCOVERY_ENDPOINT,
     SAVED_LOCATION,
     SCOPES,
-    UTC_OFFSET,
+    REFRESH_INTERVAL,
     WLAN_PASSWORD,
     WLAN_SSID
 )
@@ -27,7 +28,7 @@ picocom /dev/ttyUSB0 -b115200
 
 # Copy files.
 '''
-python pyboard.py --device /dev/ttyUSB0 -f cp app.py config.py calendar_api.py device.py images.py layout.py path.py text.py utils.py :
+python pyboard.py --device /dev/ttyUSB0 -f cp app.py boot.py config.py calendar_api.py device.py images.py layout.py path.py text.py utils.py :
 python pyboard.py --device /dev/ttyUSB0 app.py
 '''
 
@@ -139,10 +140,20 @@ class App:
                 self._error(message=message)
                 return
 
-        self._notify('Syncing', messages=[
-            'Updating calendar events'
-        ])
+        if notify:
+            self._notify('Syncing', messages=[
+                'Updating calendar events'
+            ])
+
         self.build_calendar_ui()
+        print('Entering deep sleep.')
+        machine.deepsleep(REFRESH_INTERVAL * 60 * 1000)
+
+    def on_wakeup(self):
+        '''
+        Execute this method after waking up from deep sleep.
+        '''
+        self.initialize(notify=False)
 
 
     def build_calendar_ui(self):

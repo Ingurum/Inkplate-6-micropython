@@ -1,21 +1,16 @@
 import time
 
+import machine
 import network
 import ntptime
 import utime
 
-from config import WLAN_PASSWORD, WLAN_SSID, UTC_OFFSET
+from config import WLAN_PASSWORD, WLAN_SSID
 from inkplate import Inkplate
 
 display = Inkplate(Inkplate.INKPLATE_1BIT)
 width = display.width()
 height = display.height()
-
-
-def time_stamp(year, month, day, hours=0, minutes=0, seconds=0):
-    # RFC 3339 Timestamp
-    # 2011-06-03T10:00:00Z
-    return '{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}Z'.format(year, month, day, hours, minutes, seconds)
 
 
 def initialize():
@@ -47,16 +42,15 @@ def draw_grid():
 
     display.display()
 
-
-def rfc_3339_offset(year, month, day, hours=0, minutes=0, seconds=0):
-    t = utime.mktime((year, month, day, hours, minutes, seconds, 0, 0))
-    t += UTC_OFFSET * 3600  # 1 hr in seconds
-    a_year, a_month, a_day, a_hours, a_minutes, a_seconds, _, _ = utime.localtime(
-        t
-    )
-    return time_stamp(a_year, a_month, a_day, a_hours, a_minutes, a_seconds)
+def deep_sleep():
+    print('About to deep sleep')
+    machine.deepsleep(10 * 1000)
 
 
 if __name__ == "__main__":
-    initialize()
-    draw_grid()
+    if machine.reset_cause() == machine.DEEPSLEEP_RESET:
+        print('Waking up.')
+
+    deep_sleep()
+
+    

@@ -23,3 +23,6 @@ WLAN_PASSWORD = '<your_password>'
 
 # Time Zone Configuration
 UTC_OFFSET = -8.0
+
+# Deep sleep interval in minutes
+REFRESH_INTERVAL = 10
